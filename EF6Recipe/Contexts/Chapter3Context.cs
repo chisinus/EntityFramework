@@ -16,7 +16,7 @@ namespace EF6Recipe.Contexts
 
     public partial class Chapter3Context : DbContext
     {
-        public Chapter3Context() : base("name=EF6RecipesContext")
+        public Chapter3Context() : base("name=EF6RecipeContext")
         {
         }
 
@@ -25,8 +25,8 @@ namespace EF6Recipe.Contexts
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Associate>().ToTable("Chapter3.Associate");
-            modelBuilder.Entity<AssociateSalary>().ToTable("Chapter3.AssociateSalary");
+            modelBuilder.Entity<Associate>().ToTable("Associate");
+            modelBuilder.Entity<AssociateSalary>().ToTable("AssociateSalary");
 
             // Explicilty assign key as primary key in AssociateSalary does not meet
             // Entity Framework default mapping conventions.

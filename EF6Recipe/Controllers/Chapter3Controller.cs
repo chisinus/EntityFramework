@@ -2,11 +2,10 @@
 using EF6Recipe.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
 using System.Web.Mvc;
 
 namespace EF6Recipe.Controllers
@@ -15,12 +14,29 @@ namespace EF6Recipe.Controllers
     {
         public ViewResult Index()
         {
-            var asyncTask = EF6AAsyncDemo();
+            var asyncTask = EF6AsyncDemo();
 
             foreach (var c in BusyChars())
             {
-
+                if (asyncTask.IsCompleted)
+                {
+                    break;
+                }
+                Console.Write(c);
+                Console.CursorLeft = 0;
+                Thread.Sleep(100);
             }
+
+            Console.WriteLine("\nPress <enter> to continue...");
+            Console.WriteLine();
+            //using (var context = new Chapter3Context())
+            //{
+            //    Associate aa = new Associate();
+            //    aa.Name = "ABC";
+
+            //    context.Associates.Add(aa);
+            //    context.SaveChanges();
+            //}
 
             return new ViewResult();
         }
@@ -36,7 +52,7 @@ namespace EF6Recipe.Controllers
             }
         }
 
-        private static async Task EF6AsyncDemo()
+        private async Task EF6AsyncDemo()
         {
             await Cleanup();
             await LoadData();
@@ -45,7 +61,7 @@ namespace EF6Recipe.Controllers
             await RunSingleOrDefaultAsyncExampe();
         }
 
-        private static async Task Cleanup()
+        private async Task Cleanup()
         {
             using (var context = new Chapter3Context())
             {
@@ -53,13 +69,13 @@ namespace EF6Recipe.Controllers
                 // execute raw sql statement asynchronoulsy
                 Console.WriteLine("Cleaning Up Previous Test Data");
                 Console.WriteLine("=========\n");
-                await context.Database.ExecuteSqlCommandAsync("delete from chapter3.AssociateSalary");
-                await context.Database.ExecuteSqlCommandAsync("delete from chapter3.Associate");
+                await context.Database.ExecuteSqlCommandAsync("delete from AssociateSalary");
+                await context.Database.ExecuteSqlCommandAsync("delete from Associate");
                 await Task.Delay(5000);
             }
         }
 
-        private static async Task LoadData()
+        private async Task LoadData()
         {
             using (var context = new Chapter3Context())
             {
@@ -96,7 +112,7 @@ namespace EF6Recipe.Controllers
             }
         }
 
-        private static async Task RunForEachAsyncExample()
+        private async Task RunForEachAsyncExample()
         {
             using (var context = new Chapter3Context())
             {
@@ -115,7 +131,7 @@ namespace EF6Recipe.Controllers
                 await Task.Delay(5000);
             }
         }
-        private static async Task RunToListAsyncExampe()
+        private async Task RunToListAsyncExampe()
         {
             using (var context = new Chapter3Context())
             {
@@ -135,7 +151,7 @@ namespace EF6Recipe.Controllers
                 await Task.Delay(5000);
             }
         }
-        private static async Task RunSingleOrDefaultAsyncExampe()
+        private async Task RunSingleOrDefaultAsyncExampe()
         {
             using (var context = new Chapter3Context())
             {
