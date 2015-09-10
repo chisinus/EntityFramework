@@ -14,74 +14,39 @@ namespace EF6Recipe.Controllers
     {
         public ViewResult Index()
         {
-            var asyncTask = EF6AsyncDemo();
-
-            foreach (var c in BusyChars())
-            {
-                if (asyncTask.IsCompleted)
-                {
-                    break;
-                }
-                Console.Write(c);
-                Console.CursorLeft = 0;
-                Thread.Sleep(100);
-            }
-
-            Console.WriteLine("\nPress <enter> to continue...");
-            Console.WriteLine();
-            //using (var context = new Chapter3Context())
-            //{
-            //    Associate aa = new Associate();
-            //    aa.Name = "ABC";
-
-            //    context.Associates.Add(aa);
-            //    context.SaveChanges();
-            //}
+            EF6cDemo();
 
             return new ViewResult();
         }
 
-        private IEnumerable<char> BusyChars()
+        private void EF6cDemo()
         {
-            while (true)
-            {
-                yield return '\\';
-                yield return '|';
-                yield return '/';
-                yield return '-';
-            }
+            Cleanup();
+            LoadData();
+            //RunForEachExample();
+            RunToListExampe();
+            RunSingleOrDefaultExampe();
         }
 
-        private async Task EF6AsyncDemo()
-        {
-            await Cleanup();
-            await LoadData();
-            await RunForEachAsyncExample();
-            await RunToListAsyncExampe();
-            await RunSingleOrDefaultAsyncExampe();
-        }
-
-        private async Task Cleanup()
+        private void Cleanup()
         {
             using (var context = new Chapter3Context())
             {
                 // delete previous test data
-                // execute raw sql statement asynchronoulsy
-                Console.WriteLine("Cleaning Up Previous Test Data");
-                Console.WriteLine("=========\n");
-                await context.Database.ExecuteSqlCommandAsync("delete from AssociateSalary");
-                await context.Database.ExecuteSqlCommandAsync("delete from Associate");
-                await Task.Delay(5000);
+                Response.Write("Cleaning Up Previous Test Data<br />");
+                Response.Write("=========<br />");
+                context.Database.ExecuteSqlCommand("delete from AssociateSalary");
+                context.Database.ExecuteSqlCommand("delete from Associate");
             }
         }
 
-        private async Task LoadData()
+        private void LoadData()
         {
             using (var context = new Chapter3Context())
             {
                 // add new test data
-                Console.WriteLine("Adding Test Data");
-                Console.WriteLine("=========\n");
+                Response.Write("Adding Test Data<br />");
+                Response.Write("=========\n<br />");
                 var assoc1 = new Associate { Name = "Janis Roberts" };
                 var assoc2 = new Associate { Name = "Kevin Hodges" };
                 var assoc3 = new Associate { Name = "Bill Jordan" };
@@ -106,66 +71,61 @@ namespace EF6Recipe.Controllers
                 context.Associates.Add(assoc1);
                 context.Associates.Add(assoc2);
                 context.Associates.Add(assoc3);
-                // update datastore asynchronoulsy
-                await context.SaveChangesAsync();
-                await Task.Delay(5000);
+
+                context.SaveChanges();
             }
         }
 
-        private async Task RunForEachAsyncExample()
+        //private void RunForEachExample()
+        //{
+        //    using (var context = new Chapter3Context())
+        //    {
+        //        Response.Write("ForEach Call<br />");
+        //        Response.Write("=========<br />");
+                
+        //        context.Associates.Include(x => x.AssociateSalaries).ForEachAsync(x =>
+        //        {
+        //            Response.Write(string.Format("Here are the salaries for Associate {0}:<br />", x.Name));
+        //            foreach (var salary in x.AssociateSalaries)
+        //            {
+        //                Response.Write(string.Format("\t{0}<br />", salary.Salary));
+        //            }
+        //        });
+        //    }
+        //}
+
+        private void RunToListExampe()
         {
             using (var context = new Chapter3Context())
             {
-                Console.WriteLine("Async ForEach Call");
-                Console.WriteLine("=========");
+                Response.Write("\n\nRunToList Call<br />");
+                Response.Write("=========<br />");
                 
-                // leverage ForEachAsync
-                await context.Associates.Include(x => x.AssociateSalaries).ForEachAsync(x =>
-                {
-                    Console.WriteLine("Here are the salaries for Associate {0}:", x.Name);
-                    foreach (var salary in x.AssociateSalaries)
-                    {
-                        Console.WriteLine("\t{0}", salary.Salary);
-                    }
-                });
-                await Task.Delay(5000);
-            }
-        }
-        private async Task RunToListAsyncExampe()
-        {
-            using (var context = new Chapter3Context())
-            {
-                Console.WriteLine("\n\nAsync ToList Call");
-                Console.WriteLine("=========");
-                
-                // leverage ToListAsync
-                var associates = await context.Associates.Include(x => x.AssociateSalaries).OrderBy(x => x.Name).ToListAsync();
+                var associates = context.Associates.Include(x => x.AssociateSalaries).OrderBy(x => x.Name);
                 foreach (var associate in associates)
                 {
-                    Console.WriteLine("Here are the salaries for Associate {0}:", associate.Name);
+                    Response.Write(string.Format("Here are the salaries for Associate {0}:<br />", associate.Name));
                     foreach (var salaryInfo in associate.AssociateSalaries)
                     {
-                        Console.WriteLine("\t{0}", salaryInfo.Salary);
+                        Response.Write(string.Format("\t{0}<br />", salaryInfo.Salary));
                     }
                 }
-                await Task.Delay(5000);
             }
         }
-        private async Task RunSingleOrDefaultAsyncExampe()
+        private void RunSingleOrDefaultExampe()
         {
             using (var context = new Chapter3Context())
             {
-                Console.WriteLine("\n\nAsync SingleOrDefault Call");
-                Console.WriteLine("=========");
+                Response.Write("\n\nSingleOrDefault Call<br />");
+                Response.Write("=========<br />");
 
-                var associate = await context.Associates.Include(x => x.AssociateSalaries).OrderBy(x => x.Name).FirstOrDefaultAsync(y => y.Name == "Kevin Hodges");
+                var associate = context.Associates.Include(x => x.AssociateSalaries).OrderBy(x => x.Name).FirstOrDefault(y => y.Name == "Kevin Hodges");
 
-                Console.WriteLine("Here are the salaries for Associate {0}:", associate.Name);
+                Response.Write(string.Format("Here are the salaries for Associate {0}:<br />", associate.Name));
                 foreach (var salaryInfo in associate.AssociateSalaries)
                 {
-                    Console.WriteLine("\t{0}", salaryInfo.Salary);
+                    Response.Write(string.Format("\t{0}<br />", salaryInfo.Salary));
                 }
-                await Task.Delay(5000);
             }
         }
     }
